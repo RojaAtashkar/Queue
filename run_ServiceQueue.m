@@ -1,4 +1,4 @@
-n_samples = 100;
+n_samples = 10000;
 max_time = 1000;
 NInSystem = [];
 
@@ -7,14 +7,16 @@ NInSystem = [];
 % short, apparently because the log entries are not close enough to
 % independent. So the log interval should be long enough for several
 % arrival and departure events happen.
+busy_time = 0;
 for sample_num = 1:n_samples
     q = ServiceQueue(LogInterval=10);
     q.schedule_event(Arrival(1, Customer(1)));
     run_until(q, max_time);
     % Pull out samples of the number of customers in the queue system
     NInSystem = [NInSystem, q.Log.NWaiting + q.Log.NInService];
+    busy_time = busy_time + q.busy_time;
 end
-
+rho = busy_time/(n_samples * max_time)
 %% Make a picture
 hold on;
 
@@ -25,7 +27,6 @@ h = histogram(NInSystem, Normalization="probability", BinMethod="integers");
 % The agreement isn't all that good unless you run for a long time, say
 % max_time = 10,000 units, and LogInterval is small, say 0.05.
 % The simulation will take a couple of minutes to run.
-rho = q.ArrivalRate / q.DepartureRate;
 P0 = 1 - rho;
 nMax = 10;
 ns = 0:nMax;

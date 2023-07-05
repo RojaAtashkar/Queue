@@ -4,6 +4,7 @@ classdef ServiceQueue < handle
         DepartureRate = 1/1.5;
         NumServers = 1;
         LogInterval = 1;
+        busy_time = 0;
     end
     properties (SetAccess = private)
         Time = 0;
@@ -41,7 +42,7 @@ classdef ServiceQueue < handle
         end
         function obj = run_until(obj, MaxTime)
             while obj.Time < MaxTime
-                handle_next_event(obj)
+                handle_next_event(obj);
             end
         end
         function schedule_event(obj, event)
@@ -87,6 +88,7 @@ classdef ServiceQueue < handle
             obj.Servers{j} = customer;
             obj.ServerAvailable(j) = false;
             service_time = random(obj.ServiceDist);
+            obj.busy_time = obj.busy_time + service_time;
             obj.schedule_event(Departure(obj.Time + service_time, j));
         end
         function advance(obj)
