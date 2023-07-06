@@ -36,13 +36,13 @@ for sample_num = 1:n_samples
     r = size(n_in_queue_1);
     expected_n_1 = sum(n_in_queue_1)/r(1) + expected_n_1;
     r = size(q1.time_in_system);
-    expected_T_1 = sum(q1.time_in_system)/r(2) + expected_T_1;
+    expected_T_1 = sum(q1.time/_in_system)/r(2) + expected_T_1;
 
     r = size(n_in_queue_2);
     expected_n_2 = sum(n_in_queue_2)/r(1) + expected_n_2;
     r = size(q1.time_in_system);
     expected_T_2 = sum(q2.time_in_system)/r(2) + expected_T_2;
-    stationary_dist(n_in_queue_1, n_in_queue_2)
+    % stationary_dist(n_in_queue_1, n_in_queue_2)
 end
 
 expected_T_1 = expected_T_1/n_samples
