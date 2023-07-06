@@ -10,6 +10,8 @@ classdef ServiceQueue < handle
         time_in_system = [];
         max_time = 1000;
         p = 1/3;
+        id = 0;
+        last_arrival_time = 0;
 
     end
     properties (SetAccess = private)
@@ -87,6 +89,13 @@ classdef ServiceQueue < handle
                 if negSignal.degree > 0
              obj.source_q.schedule_event(negSignal);
                 end
+            end
+        end
+        function handle_posSignal(obj, posSignal)
+            if posSignal.degree > 0
+                 obj.last_arrival_time = generator(ArrivalRate, obj.last_arrival_time, obj.id, q1);
+                 obj.handle_next_event();
+                obj.id =ob.id + 1;
             end
         end
 

@@ -10,6 +10,8 @@ classdef ServiceQueue < handle
         time_in_system = [];
         max_time = 1000;
         p = 1/3;
+        id = 0;
+        last_arrival_time = 0;
 
     end
     properties (SetAccess = private)
@@ -48,8 +50,6 @@ classdef ServiceQueue < handle
         end
         function schedule_event(obj, event)
             if event.Time < obj.Time
-                disp(event.Time)
-                disp(obj.Time)
                 error('event happens in the past');
             end
             push(obj.Events, event);
@@ -81,37 +81,52 @@ classdef ServiceQueue < handle
         end
         function handle_negSignal(obj, negSignal)
             if size(obj.Waiting) > 0
-                disp("in handle neg signal")
+                % disp("in handle neg signal")
                 customer = obj.Waiting{end};
                 customer.hited = true;
-                obj.Waiting{end} = [];
-               
+                obj.Waiting(end)= [];
                 negSignal.degree = negSignal.degree - 1;
                 if negSignal.degree > 0
              obj.source_q.schedule_event(negSignal);
                 end
             end
+            advance(obj);
         end
+        function handle_posSignal(obj, posSignal)
+            if posSignal.degree > 0
+                next_customer = Customer(obj.id);
+                 obj.id =obj.id + 1;
+            arrival = Arrival(obj.Time + 0.01, next_customer);
+            obj.schedule_event(arrival);  
+            end
+            advance(obj);
+        end
+
+
         function handle_departure(obj, departure)
             j = departure.ServerIndex;
-            customer = obj.Servers{j};
-            pr
-            if customer.hited == false
-                 customer.DepartureTime = departure.Time;
-                obj.time_in_system = [obj.time_in_system, -customer.ArrivalTime + customer.DepartureTime];
-                obj.Served{end+1} = customer;
-                obj.Servers{j} = false;
-                obj.ServerAvailable(j) = true;
-                if ~ isempty(obj.source_q)
-                     r = rand(1)
-                    if r < obj.p
-                  disp("departuring negative signal")
-                 negSignal = NegativeSignal(obj.source_q.Time, 2);
-                 obj.source_q.schedule_event(negSignal);
-                    end
+            customer = obj.Servers{j};       
+             customer.DepartureTime = departure.Time;
+            obj.time_in_system = [obj.time_in_system, -customer.ArrivalTime + customer.DepartureTime];
+            obj.Served{end+1} = customer;
+            obj.Servers{j} = false;
+            obj.ServerAvailable(j) = true;
+            if ~ isempty(obj.source_q)
+                 r = rand(1);
+                if r < obj.p
+          % if you want negative signal, uncomment this
+             %negSignal = NegativeSignal(obj.source_q.Time, 2);
+             %obj.source_q.schedule_event(negSignal);
+
+
+
+           % if you want positive signal, uncomment this
+           posSignal = PositiveSignal(obj.source_q.Time, 2);
+           obj.source_q.schedule_event(posSignal);
+                end
         
             end
-            end
+        
             advance(obj)
         end
 

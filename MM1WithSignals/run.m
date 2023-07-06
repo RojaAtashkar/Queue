@@ -1,7 +1,6 @@
 clc, clear all;
 ArrivalRate = 0.5;
 ServiceRate  = 1/1.5;
-last_arrival_time = 0;
 id = 0;
 q1 = ServiceQueue(LogInterval=10);
 n_samples = 10;
@@ -15,12 +14,10 @@ for sample_num = 1:n_samples
     q1 = ServiceQueue(LogInterval=10);
     q1.source_q = q1;
     while q1.Time < max_time 
-      last_arrival_time = generator(ArrivalRate, last_arrival_time, id, q1);
+     q1.last_arrival_time = generator(ArrivalRate, q1.last_arrival_time, q1.id, q1);
       q1.handle_next_event();
-      id = id + 1;
+      q1.id =q1.id + 1;
     end
-    id = 0;
-    last_arrival_time  = 0;
     n_in_queue_1 = [n_in_queue_1, q1.Log.NWaiting + q1.Log.NInService];
     busy_time = busy_time + q1.busy_time;
 
