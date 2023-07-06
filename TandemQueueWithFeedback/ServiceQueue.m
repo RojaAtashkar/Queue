@@ -9,6 +9,7 @@ classdef ServiceQueue < handle
         source_q;
         time_in_system = [];
         max_time = 1000;
+        p = 1/3;
 
     end
     properties (SetAccess = private)
@@ -89,7 +90,13 @@ classdef ServiceQueue < handle
             if ~ isempty(obj.dest_q)
              arrival = Arrival(obj.dest_q.Time, customer);
              obj.dest_q.schedule_event(arrival);
-    
+            end
+            if ~ isempty(obj.source_q)
+                r = rand(1);
+                if r < obj.p
+             arrival = Arrival(obj.source_q.Time, customer);
+             obj.source_q.schedule_event(arrival);
+                end    
             end
 
             advance(obj);

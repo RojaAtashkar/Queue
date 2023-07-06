@@ -20,6 +20,7 @@ for sample_num = 1:n_samples
     q1 = ServiceQueue(LogInterval=10);
     q2 = ServiceQueue(LogInterval=10);
     q1.dest_q = q2;
+    q2.source_q = q1
     while q1.Time < max_time 
       last_arrival_time = generator(ArrivalRate, last_arrival_time, id, q1);
       q1.handle_next_event();
