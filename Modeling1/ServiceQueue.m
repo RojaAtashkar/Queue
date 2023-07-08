@@ -5,13 +5,16 @@ classdef ServiceQueue < handle
         NumServers = 1;
         LogInterval = 1;
         busy_time = 0;
-        dest_q;
-        source_q;
         time_in_system = [];
         max_time = 1000;
         p = 1/3;
         id = 0;
         last_arrival_time = 0;
+        packet_size = 0;
+        main_queue = false;
+        customers_in_packet = 0;
+        set_new_packet = true;
+        dummy_queue;
 
     end
     properties (SetAccess = private)
@@ -90,7 +93,7 @@ classdef ServiceQueue < handle
              obj.source_q.schedule_event(negSignal);
                 end
             end
-            negSignal.hited
+            negSignal.degree = 0;
             advance(obj);
         end
         function handle_posSignal(obj, posSignal)
@@ -102,7 +105,17 @@ classdef ServiceQueue < handle
             end
             advance(obj);
         end
-
+        function handle_packet(obj)
+            if obj.packet_size == obj.customers_in_packet
+                obj.set_new_packet = true;
+            end
+            
+        if obj.set_new_packet
+            obj.packet_size = randi([1 10], 1);
+            obj.set_new_packet = false;
+            obj.customers_in_packet = 0;
+        end
+        end
 
         function handle_departure(obj, departure)
             j = departure.ServerIndex;
@@ -112,21 +125,12 @@ classdef ServiceQueue < handle
             obj.Served{end+1} = customer;
             obj.Servers{j} = false;
             obj.ServerAvailable(j) = true;
-            if ~ isempty(obj.source_q)
-                 r = rand(1);
-                if r < obj.p
-          % if you want negative signal, uncomment this
-             %negSignal = NegativeSignal(obj.source_q.Time, 2);
-             %obj.source_q.schedule_event(negSignal);
-
-
-
-           % if you want positive signal, uncomment this
-           posSignal = PositiveSignal(obj.source_q.Time, 2);
-           obj.source_q.schedule_event(posSignal);
-                end
+            if obj.main_queue
+                pos_signal = PositiveSignal(obj.dummy_queue.Time);
+                obj.dummy_queue.schedule_event(pos_signal)
+             end
         
-            end
+           
         
             advance(obj)
         end

@@ -1,4 +1,4 @@
-clc, clear all;
+clc, clear all;8765
 ArrivalRate = 0.5;
 ServiceRate  = 1/1.5;
 id = 0;

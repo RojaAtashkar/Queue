@@ -90,6 +90,7 @@ classdef ServiceQueue < handle
              obj.source_q.schedule_event(negSignal);
                 end
             end
+            negSignal.degree = 0;
             advance(obj);
         end
         function handle_posSignal(obj, posSignal)

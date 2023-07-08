@@ -1,0 +1,42 @@
+clc, clear all;
+ArrivalRate = 0.5;
+ServiceRate  = 1/1.5;
+last_arrival_time = 0;
+Time = 0;
+id = 0;
+q1 = ServiceQueue(LogInterval=10, DepartureRate = 1.4);
+q2 = ServiceQueue(LogInterval=10);
+Queues = {q1, q2};
+n_samples = 10;
+max_time = 1000;
+busy_time= 0;
+landa_1 = 0;
+expected_T_1 = 0;
+expected_n_1 = 0;
+for sample_num = 1:n_samples
+    n_in_queue = [];
+    q1 = ServiceQueue(LogInterval=10);
+    q2 = ServiceQueue(LogInterval=10);
+    q1.dest_q = q2;
+    while q1.Time < max_time
+      last_arrival_time = generator(ArrivalRate, last_arrival_time, id, q1);
+      q1.handle_next_event();
+      q2.handle_next_event();
+      id = id + 1;
+    end
+    id = 0;
+    last_arrival_time  = 0;
+ 
+    n_in_queue = [n_in_queue, q1.Log.NWaiting + q1.Log.NInService];
+    busy_time = busy_time + q2.busy_time + q1.busy_time;
+    r = size(n_in_queue);
+    expected_n_1 = sum(n_in_queue)/r(1) + expected_n;
+    r = size(q1.time_in_system);
+    expected_T_1 = sum(q1.time_in_system)/r(2) + expected_T;
+end
+
+expected_T_1 = expected_T/n_samples
+expected_n_1 = expected_n/n_samples
+landa_1 = expected_n/expected_T
+rho = busy_time/(n_samples * max_time*2);
+n_in_queue;
