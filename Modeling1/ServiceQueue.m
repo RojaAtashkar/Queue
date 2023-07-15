@@ -5,16 +5,14 @@ classdef ServiceQueue < handle
         NumServers = 1;
         LogInterval = 1;
         busy_time = 0;
+        dest_q;
+        source_q;
         time_in_system = [];
         max_time = 1000;
-        p = 1/3;
-        id = 0;
+        batch_size = 3;
         last_arrival_time = 0;
-        packet_size = 0;
-        main_queue = false;
-        customers_in_packet = 0;
-        set_new_packet = true;
-        dummy_queue;
+        dummy_q;
+        id = 0;
 
     end
     properties (SetAccess = private)
@@ -82,40 +80,19 @@ classdef ServiceQueue < handle
             % Schedule next arrival...
             advance(obj);
         end
-        function handle_negSignal(obj, negSignal)
-            if size(obj.Waiting) > 0
-                % disp("in handle neg signal")
-                customer = obj.Waiting{end};
-                customer.hited = true;
-                obj.Waiting(end)= [];
-                negSignal.degree = negSignal.degree - 1;
-                if negSignal.degree > 0
-             obj.source_q.schedule_event(negSignal);
-                end
+      
+         function handle_partial_departure(obj)
+            x = 0;
+            if length(obj.Waiting) >=obj.batch_size-1
+                x=obj.batch_size-1;
+            else
+                x = length(obj.Waiting);
             end
-            negSignal.degree = 0;
-            advance(obj);
-        end
-        function handle_posSignal(obj, posSignal)
-            if posSignal.degree > 0
-                next_customer = Customer(obj.id);
-                 obj.id =obj.id + 1;
-            arrival = Arrival(obj.Time + 0.01, next_customer);
-            obj.schedule_event(arrival);  
-            end
-            advance(obj);
-        end
-        function handle_packet(obj)
-            if obj.packet_size == obj.customers_in_packet
-                obj.set_new_packet = true;
+            for i=1:x
+               obj.Waiting(1) = [];
             end
             
-        if obj.set_new_packet
-            obj.packet_size = randi([1 10], 1);
-            obj.set_new_packet = false;
-            obj.customers_in_packet = 0;
-        end
-        end
+             end
 
         function handle_departure(obj, departure)
             j = departure.ServerIndex;
@@ -124,14 +101,12 @@ classdef ServiceQueue < handle
             obj.time_in_system = [obj.time_in_system, -customer.ArrivalTime + customer.DepartureTime];
             obj.Served{end+1} = customer;
             obj.Servers{j} = false;
-            obj.ServerAvailable(j) = true;
-            if obj.main_queue
-                pos_signal = PositiveSignal(obj.dummy_queue.Time);
-                obj.dummy_queue.schedule_event(pos_signal)
-             end
-        
-           
-        
+            obj.ServerAvailable(j) = true;  
+             if ~ isempty(obj.dummy_q)
+             arrival = Arrival(obj.dummy_q.Time, customer);
+             obj.dummy_q.schedule_event(arrival);
+
+            end
             advance(obj)
         end
 
@@ -155,6 +130,7 @@ classdef ServiceQueue < handle
                     customer = obj.Waiting{1};
                     obj.Waiting(1) = [];
                     % and begin serving
+                    handle_partial_departure(obj);
                     begin_serving(obj, j, customer);
                 end
             end
