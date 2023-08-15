@@ -1,14 +1,14 @@
 classdef ServiceQueue < handle
     properties (SetAccess = public)
         ArrivalRate = 0.5;
-        DepartureRate = 1/1.5;
+        DepartureRate = 1;
         NumServers = 1;
         LogInterval = 1;
         busy_time = 0;
         dest_q;
         source_q;
         time_in_system = [];
-        max_time = 1000;
+        max_time = 10000;
         batch_size = 3;
         last_arrival_time = 0;
         dummy_q;
