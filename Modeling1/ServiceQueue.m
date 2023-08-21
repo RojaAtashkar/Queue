@@ -1,14 +1,14 @@
 classdef ServiceQueue < handle
     properties (SetAccess = public)
         ArrivalRate = 0.5;
-        DepartureRate = 1;
+        DepartureRate = 1.5;
         NumServers = 1;
         LogInterval = 1;
         busy_time = 0;
         dest_q;
         source_q;
         time_in_system = [];
-        max_time = 10000;
+        max_time = 8000;
         batch_size = 3;
         last_arrival_time = 0;
         dummy_q;
@@ -117,7 +117,9 @@ classdef ServiceQueue < handle
             obj.Servers{j} = customer;
             obj.ServerAvailable(j) = false;
             service_time = random(obj.ServiceDist);
+            if obj.Time < obj.max_time * 0.9 && obj.Time > obj.max_time * 0.1
             obj.busy_time = obj.busy_time + service_time;
+            end
             obj.schedule_event(Departure(obj.Time + service_time, j));
         end
         function advance(obj)
@@ -136,11 +138,11 @@ classdef ServiceQueue < handle
             end
         end
         function handle_record_to_log(obj, record)
-            record_log(obj);
-            schedule_event(obj, RecordToLog(obj.Time + obj.LogInterval));
+            %record_log(obj);
+            %schedule_event(obj, RecordToLog(obj.Time + obj.LogInterval));
         end
         function record_log(obj)
-            if obj.Time < obj.max_time * 0.8 && obj.Time > obj.max_time * 0.2
+            if obj.Time < obj.max_time * 0.9 && obj.Time > obj.max_time * 0.1
             NWaiting = length(obj.Waiting);
             NInService = obj.NumServers - sum(obj.ServerAvailable);
             NServed = length(obj.Served);
