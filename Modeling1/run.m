@@ -1,5 +1,5 @@
  clc, clear all;
-max_time = 8000;
+max_time = 7000;
 busy_time_1= [];
 busy_time_2= [];
 rho_1 = [];
@@ -10,7 +10,7 @@ expected_T_1 = [];
 expected_n_1 = [];
 expected_T_2 = [];
 expected_n_2 = [];
-for l = 1.4:0.1:1.8
+for l = 1.9:0.1:2.5
     last_arrival_time = 0;
     n_in_queue_1 = [];
     n_in_queue_2 = [];
